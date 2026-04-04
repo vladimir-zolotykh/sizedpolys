@@ -33,3 +33,4 @@ def test_write_records(tmp_path) -> None:
     with open(file_path, "rb") as f:
         got_records = read_records(fmt, f)
     assert records == got_records
+    assert file_path.exists()

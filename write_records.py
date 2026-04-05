@@ -16,8 +16,7 @@ def write_records(records: list[RecordType], format: str, f: BinaryIO):
 
 def read_records(format: str, f: BinaryIO) -> list[RecordType]:
     s = Struct(format)
-    size = calcsize(format)
-    return [s.unpack(r) for r in iter(partial(f.read, size), b"")]
+    return [s.unpack(r) for r in iter(partial(f.read, s.size), b"")]
 
 
 def test_write_records(tmp_path) -> None:

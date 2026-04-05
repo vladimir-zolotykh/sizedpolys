@@ -5,7 +5,7 @@ from struct import Struct, calcsize
 from dataclasses import dataclass
 from itertools import chain
 
-PolyType = list[tuple[float]]
+PolyType = list[tuple[float, float]]
 PolysType = list[PolyType]
 polys: PolysType = [
     [(12.34, 56.78), (90.12, 34.56), (78.90, 12.34)],
@@ -21,18 +21,19 @@ class PolysData:
     min_y: float
     max_x: float
     max_y: float
-    polys: PolyType
+    polys: PolysType
 
 
 def make_polysdata(polys: PolysType) -> PolysData:
-    polysdata = PolysData()
     flatten = list(chain(*polys))
-    polysdata.code = 0x1234
-    polysdata.min_x = min(x for x, y in flatten)
-    polysdata.max_x = max(x for x, y in flatten)
-    polysdata.min_y = min(y for x, y in flatten)
-    polysdata.max_y = max(y for x, y in flatten)
-    polysdata.polys = polys
+    polysdata = PolysData(
+        0x1234,
+        min(x for x, y in flatten),
+        max(x for x, y in flatten),
+        min(y for x, y in flatten),
+        max(y for x, y in flatten),
+        polys,
+    )
     return polysdata
 
 
@@ -58,18 +59,18 @@ def write_polys(filename: str, polysdata: PolysData) -> None:
 
 
 def read_polys(filename: str) -> PolysData:
-    polysdata = PolysData()
+    # polysdata = PolysData()
     with open(filename, "rb") as f:
 
         def fread(format):
             s = Struct(format)
             return s.unpack(f.read(s.size), format)
 
-        polysdata.code = fread("<i")  # 0x1234
-        polysdata.min_x = fread("<d")
-        polysdata.min_y = fread("<d")
-        polysdata.max_x = fread("<d")
-        polysdata.max_y = fread("<d")
+        code = fread("<i")  # 0x1234
+        min_x = fread("<d")
+        min_y = fread("<d")
+        max_x = fread("<d")
+        max_y = fread("<d")
 
         npolys = fread("<i")
 
@@ -77,5 +78,7 @@ def read_polys(filename: str) -> PolysData:
             len = fread("<i")
             return [fread("<dd") for _ in range(len)]
 
-        polysdata = [read_poly() for _ in range(npolys)]
-        return polysdata
+        # polysdata = [read_poly() for _ in range(npolys)]
+        return PolysData(
+            code, min_x, min_y, max_x, max_y, [read_poly() for _ in range(npolys)]
+        )

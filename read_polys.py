@@ -42,7 +42,10 @@ def write_polys(filename: str, polysdata: PolysData) -> None:
 
         def fwrite(data, format):
             s = Struct(format)
-            f.write(s.pack(data))
+            if isinstance(data, tuple):
+                f.write(s.pack(*data))
+            else:
+                f.write(s.pack(data))
 
         fwrite(polysdata.code, "<i")
         for dat in (polysdata.min_x, polysdata.min_y, polysdata.max_x, polysdata.max_y):
@@ -64,7 +67,11 @@ def read_polys(filename: str) -> PolysData:
 
         def fread(format):
             s = Struct(format)
-            return s.unpack(f.read(s.size), format)
+            t = s.unpack(f.read(s.size))
+            if len(t) == 1:
+                return t[0]
+            else:
+                return t
 
         code = fread("<i")  # 0x1234
         min_x = fread("<d")
@@ -78,10 +85,8 @@ def read_polys(filename: str) -> PolysData:
             len = fread("<i")
             return [fread("<dd") for _ in range(len)]
 
-        # polysdata = [read_poly() for _ in range(npolys)]
-        return PolysData(
-            code, min_x, min_y, max_x, max_y, [read_poly() for _ in range(npolys)]
-        )
+        _polys = [read_poly() for _ in range(npolys)]
+        return PolysData(code, min_x, min_y, max_x, max_y, _polys)
 
 
 def test_write_polys(tmp_path) -> None:

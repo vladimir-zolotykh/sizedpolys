@@ -82,6 +82,11 @@ class Point(Structure):
     y: Annotated[int, "<d"]
 
 
+class Line(Structure):
+    start: Point
+    stop: Point
+
+
 def write_point(filename: str) -> None:
     with open(filename, "wb") as f:
 
@@ -103,6 +108,15 @@ def test_point(tmp_path):
         buffer = f.read()
         point = Point(buffer)
     assert (point.x, point.y) == (10.1, 20.2)
+
+
+def test_line(tmp_path):
+    line_bin = tmp_path / "line.bin"
+    write_point(line_bin)
+    with open(line_bin, "rb") as f:
+        buffer = f.read()
+        line = Line(buffer)
+    assert (line.start, line.stop) == ((10.1, 20.2), (10.1, 20.2))
 
 
 @pytest.fixture

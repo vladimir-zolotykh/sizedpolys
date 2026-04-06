@@ -1,6 +1,7 @@
 .emacs.desktop*
 ARCHIVE
 SOW/
+polys.bin
 *.mp3
 # !example.mp3
 example.py

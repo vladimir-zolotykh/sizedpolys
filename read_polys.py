@@ -24,7 +24,9 @@ class PolysData:
     polys: PolysType
 
 
-def make_polysdata(polys: PolysType) -> PolysData:
+def make_polysdata(polys: PolysType | None = polys) -> PolysData:
+    if polys is None:
+        polys = polys
     flatten = list(chain(*polys))
     polysdata = PolysData(
         0x1234,
@@ -90,7 +92,7 @@ def read_polys(filename: str) -> PolysData:
 
 
 def test_write_polys(tmp_path) -> None:
-    polysdata: PolysData = make_polysdata(polys)
+    polysdata: PolysData = make_polysdata()
     file_path = tmp_path / "polys.bin"
     write_polys(file_path, polysdata)
     got_polys = read_polys(file_path)

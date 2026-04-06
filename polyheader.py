@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+from typing import get_origin, get_args, Annotated
 import logging
 import os
 import struct
@@ -41,9 +42,11 @@ class PolyMeta(type):
         annotations = clsdict.get("__annotations__")
         offset = 0
         d = dict(clsdict)
-        for attr, fmt in annotations.items():
-            if not isinstance(fmt, str):
-                raise ValueError(f"{fmt}: annotation must be str")
+        for attr, anno in annotations.items():
+            if get_origin(anno) is Annotated:
+                _, fmt = get_args(anno)
+            else:
+                raise TypeError("Expected Annotated[...]")
             descriptor = Descriptor(fmt, offset)
             descriptor.__set_name__(None, attr)
             d[attr] = descriptor
@@ -61,12 +64,12 @@ class Structure:
 
 
 class PolyHeader(Structure, metaclass=PolyMeta):
-    code: "<i"  # noqa: F722
-    minx: "<d"  # noqa: F722
-    miny: "<d"  # noqa: F722
-    maxx: "<d"  # noqa: F722
-    maxy: "<d"  # noqa: F722
-    npolys: "<i"  # noqa: F722
+    code: Annotated[int, "<i"]
+    minx: Annotated[float, "<d"]
+    miny: Annotated[float, "<d"]
+    maxx: Annotated[float, "<d"]
+    maxy: Annotated[float, "<d"]
+    npolys: Annotated[int, "<i"]
 
 
 @pytest.fixture

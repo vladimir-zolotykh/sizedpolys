@@ -69,15 +69,6 @@ class PolyHeader(Structure, metaclass=PolyMeta):
     npolys: "<i"  # noqa: F722
 
 
-# class PolyHeader(Structure):
-#     code = Descriptor("<i", 0)
-#     minx = Descriptor("<d", 4)
-#     miny = Descriptor("<d", 12)
-#     maxx = Descriptor("<d", 20)
-#     maxy = Descriptor("<d", 28)
-#     npolys = Descriptor("<i", 36)
-
-
 @pytest.fixture
 def polysdata():
     return make_polysdata()
@@ -102,38 +93,3 @@ def test_polymeta(tmp_path, polysdata):
     ):
         assert getattr(polyheader, attr) == res
     assert polysbin.exists()
-
-
-# def test_polyheader(tmp_path, polysdata):
-#     polysbin = tmp_path / "polys.bin"
-#     write_polys(polysbin, polysdata)
-#     with open(polysbin, "rb") as f:
-#         buffer = f.read()
-#         polyheader = PolyHeader(buffer)
-#     for attr, res in zip(
-#         ["code", "minx", "miny", "maxx", "maxy", "npolys"],
-#         [
-#             (4660,),
-#             (12.34,),
-#             (90.12,),
-#             (12.34,),
-#             (89.01,),
-#             (3,),
-#         ],
-#     ):
-#         assert getattr(polyheader, attr) == res
-#     assert polysbin.exists()
-
-
-# if __name__ == "__main__":
-#     polysdat = make_polysdata()
-#     write_polys("polys.bin", polysdat)
-#     with open("polys.bin", "rb") as f:
-#         buffer = f.read()
-#         polyheader = PolyHeader(buffer)
-#     print(polyheader.code)
-#     print(polyheader.minx)
-#     print(polyheader.miny)
-#     print(polyheader.maxx)
-#     print(polyheader.maxy)
-#     print(polyheader.npolys)

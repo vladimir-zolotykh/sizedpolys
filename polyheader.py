@@ -72,6 +72,34 @@ class PolyHeader(Structure):
     npolys: Annotated[int, "<i"]
 
 
+class Point(Structure):
+    x: Annotated[int, "<d"]
+    y: Annotated[int, "<d"]
+
+
+def write_point(filename: str) -> None:
+    with open(filename, "wb") as f:
+
+        def fwrite(data, format):
+            s = struct.Struct(format)
+            if isinstance(data, tuple):
+                f.write(s.pack(*data))
+            else:
+                f.write(s.pack(data))
+
+        fwrite(10.1, "<d")
+        fwrite(20.2, "<d")
+
+
+def test_point(tmp_path):
+    pointbin = tmp_path / "point.bin"
+    write_point(pointbin)
+    with open(pointbin, "rb") as f:
+        buffer = f.read()
+        point = Point(buffer)
+    assert (point.x[0], point.y[0]) == (10.1, 20.2)
+
+
 @pytest.fixture
 def polysdata():
     return make_polysdata()

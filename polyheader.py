@@ -39,7 +39,7 @@ class Descriptor:
 
 class PolyMeta(type):
     def __new__(mcls, clsname, bases, clsdict):
-        annotations = clsdict.get("__annotations__")
+        annotations = clsdict.get("__annotations__", {})
         offset = 0
         d = dict(clsdict)
         for attr, anno in annotations.items():
@@ -58,12 +58,12 @@ class PolyMeta(type):
         return super().__new__(mcls, clsname, bases, d)
 
 
-class Structure:
+class Structure(metaclass=PolyMeta):
     def __init__(self, bytedata):
         self._buffer = memoryview(bytedata)
 
 
-class PolyHeader(Structure, metaclass=PolyMeta):
+class PolyHeader(Structure):
     code: Annotated[int, "<i"]
     minx: Annotated[float, "<d"]
     miny: Annotated[float, "<d"]

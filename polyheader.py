@@ -34,7 +34,12 @@ class Descriptor:
     def __get__(self, instance, owner=None):
         if self is None:
             return self
-        return self._struct.unpack_from(instance._buffer, self._offset)
+        # return self._struct.unpack_from(instance._buffer, self._offset)
+        t = self._struct.unpack_from(instance._buffer, self._offset)
+        if len(t) == 1:
+            return t[0]
+        else:
+            return t
 
 
 class PolyMeta(type):
@@ -97,7 +102,7 @@ def test_point(tmp_path):
     with open(pointbin, "rb") as f:
         buffer = f.read()
         point = Point(buffer)
-    assert (point.x[0], point.y[0]) == (10.1, 20.2)
+    assert (point.x, point.y) == (10.1, 20.2)
 
 
 @pytest.fixture
@@ -114,12 +119,12 @@ def test_polymeta(tmp_path, polysdata):
     for attr, res in zip(
         ["code", "minx", "miny", "maxx", "maxy", "npolys"],
         [
-            (4660,),
-            (12.34,),
-            (90.12,),
-            (12.34,),
-            (89.01,),
-            (3,),
+            4660,
+            12.34,
+            90.12,
+            12.34,
+            89.01,
+            3,
         ],
     ):
         assert getattr(polyheader, attr) == res

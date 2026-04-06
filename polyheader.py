@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
 from struct import Struct
+import pytest
+from read_polys import make_polysdata, write_polys
 
 
 class Descriptor:
@@ -34,12 +36,15 @@ class PolyHeader(Structure):
     npolys = Descriptor("<i", 36)
 
 
-def test_polyheader():
-    from read_polys import make_polysdata, write_polys
+@pytest.fixture
+def polysdata():
+    return make_polysdata()
 
-    polysdata = make_polysdata()
-    write_polys("polys.bin", polysdata)
-    with open("polys.bin", "rb") as f:
+
+def test_polyheader(tmp_path, polysdata):
+    polysbin = tmp_path / "polys.bin"
+    write_polys(polysbin, polysdata)
+    with open(polysbin, "rb") as f:
         buffer = f.read()
         polyheader = PolyHeader(buffer)
     for attr, res in zip(
@@ -54,13 +59,12 @@ def test_polyheader():
         ],
     ):
         assert getattr(polyheader, attr) == res
+    assert polysbin.exists()
 
 
 if __name__ == "__main__":
-    from read_polys import make_polysdata, write_polys
-
-    polysdata = make_polysdata()
-    write_polys("polys.bin", polysdata)
+    polysdat = make_polysdata()
+    write_polys("polys.bin", polysdat)
     with open("polys.bin", "rb") as f:
         buffer = f.read()
         polyheader = PolyHeader(buffer)

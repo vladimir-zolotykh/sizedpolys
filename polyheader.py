@@ -34,6 +34,28 @@ class PolyHeader(Structure):
     npolys = Descriptor("<i", 36)
 
 
+def test_polyheader():
+    from read_polys import make_polysdata, write_polys
+
+    polysdata = make_polysdata()
+    write_polys("polys.bin", polysdata)
+    with open("polys.bin", "rb") as f:
+        buffer = f.read()
+        polyheader = PolyHeader(buffer)
+    for attr, res in zip(
+        ["code", "minx", "miny", "maxx", "maxy", "npolys"],
+        [
+            (4660,),
+            (12.34,),
+            (90.12,),
+            (12.34,),
+            (89.01,),
+            (3,),
+        ],
+    ):
+        assert getattr(polyheader, attr) == res
+
+
 if __name__ == "__main__":
     from read_polys import make_polysdata, write_polys
 

@@ -35,9 +35,9 @@ class PolyHeader(Structure):
 
 
 if __name__ == "__main__":
-    from read_polys import polys, make_polysdata, write_polys
+    from read_polys import make_polysdata, write_polys
 
-    polysdata = make_polysdata(polys)
+    polysdata = make_polysdata()
     write_polys("polys.bin", polysdata)
     with open("polys.bin", "rb") as f:
         buffer = f.read()

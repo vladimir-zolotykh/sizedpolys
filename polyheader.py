@@ -32,7 +32,7 @@ class Descriptor:
         self._name = name
 
     def __get__(self, instance, owner=None):
-        if self is None:
+        if instance is None:
             return self
         # return self._struct.unpack_from(instance._buffer, self._offset)
         t = self._struct.unpack_from(instance._buffer, self._offset)
@@ -50,15 +50,17 @@ class PolyMeta(type):
         for attr, anno in annotations.items():
             if get_origin(anno) is Annotated:
                 _, fmt = get_args(anno)
+                descriptor = Descriptor(fmt, offset)
+                descriptor.__set_name__(None, attr)
+                d[attr] = descriptor
+                if fmt == "<i":
+                    offset += 4
+                elif fmt == "<d":
+                    offset += 8
+            elif issubclass(anno, Structure):
+                d[attr] = anno
             else:
-                raise TypeError("Expected Annotated[...]")
-            descriptor = Descriptor(fmt, offset)
-            descriptor.__set_name__(None, attr)
-            d[attr] = descriptor
-            if fmt == "<i":
-                offset += 4
-            elif fmt == "<d":
-                offset += 8
+                raise TypeError("Expected Annotated[...] or Structure")
 
         return super().__new__(mcls, clsname, bases, d)
 
@@ -113,10 +115,14 @@ def test_point(tmp_path):
 def test_line(tmp_path):
     line_bin = tmp_path / "line.bin"
     write_point(line_bin)
+    write_point(line_bin)
     with open(line_bin, "rb") as f:
         buffer = f.read()
         line = Line(buffer)
-    assert (line.start, line.stop) == ((10.1, 20.2), (10.1, 20.2))
+    assert ((line.start.x, line.start.y), (line.stop.x, line.stop.y)) == (
+        (10.1, 20.2),
+        (10.1, 20.2),
+    )
 
 
 @pytest.fixture
